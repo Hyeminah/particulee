@@ -19,7 +19,7 @@ canvas.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
 });
-
+canvas.style.background="#000000"
 // Create an array to store the dots and their positions
 const dots: { x: number; y: number; vx: number; vy: number; color: string }[] = [];
 
