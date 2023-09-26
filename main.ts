@@ -19,7 +19,7 @@ canvas.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
 });
-canvas.style.background="#000000"
+canvas.style.background = "#000000"
 // Create an array to store the dots and their positions
 const dots: { x: number; y: number; vx: number; vy: number; color: string }[] = [];
 
@@ -131,11 +131,19 @@ function moveDots() {
 
     // Draw each dot on the canvas
     dots.forEach((dot) => {
-        ctx.fillStyle = dot.color; // Set the dot's fill color
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, circleRadius, 0, Math.PI * 2); // Draw a filled circle
-        ctx.fill(); // Fill the circle
-        ctx.closePath();
+
+        const colorramdom = getRandomHexColor()
+        
+        const radgrad = ctx.createRadialGradient (dot.x, dot.y, 0, dot.x, dot.y, 20);
+        radgrad.addColorStop(0, colorramdom);
+        radgrad.addColorStop(1,"orange")
+        radgrad.addColorStop( 0.5,"transparent"); // You can change 'color' to another color if needed
+        ctx.fillStyle = radgrad 
+        ctx.fill()
+        ctx.closePath()
+    
     });
 
     // Request the next animation frame
