@@ -99,6 +99,26 @@ function moveDots() {
         const dy = mouseY - dot.y;
         const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
 
+        let click : { x: number; y: number; vx: number; vy: number; color: string } | null = null;
+function calculateDistance (x1:number, y1:number, x2: number, y2:number): number{
+    return Math.sqrt((x1 - x2)** 2 + (y1+y2)** 2)
+}
+        canvas.addEventListener("click", handleClick);
+
+        function handleClick ( event: MouseEvent){
+            let x = event.clientX - canvas.getBoundingClientRect().left;
+            let y = event.clientY - canvas.getBoundingClientRect().top;
+
+            for ( const dot of dots) {// check if the click is within the dot 
+                let distance = calculateDistance(x, y, dot.x, dot.y);
+                if (distance <= 20){
+                    click = dot; 
+                    click.color = getRandomHexColor();
+                    break;
+                }
+            }
+        }
+
         // Calculate the new velocity based on the distance to the mouse
         const speed = 5; // Adjust this value to control the speed of the interaction
         dot.vx = (dx / distanceToMouse) * speed;
@@ -125,9 +145,9 @@ function moveDots() {
     });
 
     // Add new dots if the number of dots is below a certain threshold
-    if (dots.length < 250) {
-        makedot(); // Create a new dot
-    }
+    //if (dots.length < 250) {
+       // makedot(); // Create a new dot
+    //}
 
     // Draw each dot on the canvas
     dots.forEach((dot) => {
@@ -149,11 +169,11 @@ function moveDots() {
     // Request the next animation frame
     requestAnimationFrame(moveDots);
 }
-
-// Start the animation loop
+ canvas.addEventListener("click",makedot);
+ //Start the animation loop
 moveDots();
 
 // Initial dot creation
-for (let i = 0; i < 100; i++) {
-    makedot(); // Create 100 initial dots
-}
+//for (let i = 0; i < 100; i++) {
+    //makedot(); // Create 100 initial dots
+//}
