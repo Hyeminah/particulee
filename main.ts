@@ -8,7 +8,7 @@ const width = (canvas.width = window.innerWidth);
 const height = (canvas.height = window.innerHeight);
 
 // Define the radius of the circles and export it
-const circleRadius = 20; // Radius of the circles (can be adjusted)
+const circleRadius = 12; // Radius of the circles (can be adjusted)
 const blockingRadius = circleRadius * 2; // Minimum distance for blocking interaction
 const savedistance = circleRadius * 2; // Minimum distance between dots
 let mouseX = 0; // Horizontal position of the mouse
@@ -21,18 +21,19 @@ canvas.addEventListener('mousemove', (e) => {
 });
 canvas.style.background = "#000000"
 // Create an array to store the dots and their positions
-const dots: { x: number; y: number; vx: number; vy: number; color: string }[] = [];
+const dots: { x: number; y: number; vx: number; vy: number; color: string; radius: number }[] = [];
 
 // Function to create a new dot on the canvas
 function makedot() {
     // Generate random coordinates for the dot within the canvas size
     const randomCoordinates = getRandomCoordinates();
     const { x, y } = randomCoordinates;
+    const size = circleRadius + Math.random() * 3
 
     // Generate random velocity for the dot
     const { vx, vy } = getRandomVelocity();
 
-    // Get a random color for the dot
+    // Get a random color for the dot   
     const color = getRandomHexColor();
 
     let isok = true;
@@ -54,7 +55,7 @@ function makedot() {
 
     // If the dot is not too close to others or the cursor, add it to the array
     if (isok) {
-        dots.push({ x, y, vx, vy, color });
+        dots.push({ x, y, vx, vy, color, radius: size });
     }
 }
 
@@ -68,8 +69,8 @@ function getRandomCoordinates() {
 
 // Function to generate random velocity for the dots
 function getRandomVelocity() {
-    const minSpeed = 2; // Minimum speed
-    const maxSpeed = 10; // Maximum speed
+    const minSpeed = 5; // Minimum speed
+    const maxSpeed = 20; // Maximum speed
     const vx = (Math.random() * (maxSpeed - minSpeed) + minSpeed) * (Math.random() < 0.5 ? -1 : 1);
     const vy = (Math.random() * (maxSpeed - minSpeed) + minSpeed) * (Math.random() < 0.5 ? -1 : 1);
     return { vx, vy };
@@ -77,11 +78,11 @@ function getRandomVelocity() {
 
 // Function to generate a random hex color
 function getRandomHexColor(): string {
-    var randomcolor = "#"; // Initialize the hex color string
-    var letters = "0123456789ABCDEF"; // Hexadecimal characters
+    let randomcolor = "#"; // Initialize the hex color string
+    let letters = "0123456789ABCDEF"; // Hexadecimal characters
 
     // Generate a random 6-character hex color code
-    for (var i = 0; i < 6; i++) {
+    for (let i = 0; i < 6; i++) {
         randomcolor += letters[Math.floor(Math.random() * 16)]; // Add a random character
     }
     return randomcolor; // Return the random hex color code
@@ -99,28 +100,28 @@ function moveDots() {
         const dy = mouseY - dot.y;
         const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
 
-        let click : { x: number; y: number; vx: number; vy: number; color: string } | null = null;
-function calculateDistance (x1:number, y1:number, x2: number, y2:number): number{
-    return Math.sqrt((x1 - x2)** 2 + (y1+y2)** 2)
-}
+        let click: { x: number; y: number; vx: number; vy: number; color: string; radius: number } | null = null;
+        function calculateDistance(x1: number, y1: number, x2: number, y2: number): number {
+            return Math.sqrt((x1 - x2) ** 2 + (y1 + y2) ** 2)
+        }
         canvas.addEventListener("click", handleClick);
 
-        function handleClick ( event: MouseEvent){
+        function handleClick(event: MouseEvent) {
             let x = event.clientX - canvas.getBoundingClientRect().left;
             let y = event.clientY - canvas.getBoundingClientRect().top;
 
-            for ( const dot of dots) {// check if the click is within the dot 
+            for (const dot of dots) {// check if the click is within the dot 
                 let distance = calculateDistance(x, y, dot.x, dot.y);
-                if (distance <= 20){
-                    click = dot; 
-                    click.color = getRandomHexColor();
+                if (distance <= dot.radius) {
+                    click = dot;
+                    click.radius = Math.random() * 50 + 15
                     break;
                 }
             }
         }
 
         // Calculate the new velocity based on the distance to the mouse
-        const speed = 5; // Adjust this value to control the speed of the interaction
+        const speed = 2; // Adjust this value to control the speed of the interaction
         dot.vx = (dx / distanceToMouse) * speed;
         dot.vy = (dy / distanceToMouse) * speed;
 
@@ -131,49 +132,41 @@ function calculateDistance (x1:number, y1:number, x2: number, y2:number): number
         // Check if the dot is outside the canvas boundaries and reverse its velocity if needed
         if (dot.x - circleRadius < 0 || dot.x + circleRadius > width) {
             dot.vx *= -1;
-            dot.color = getRandomHexColor();
         }
         if (dot.y - circleRadius < 0 || dot.y + circleRadius > height) {
             dot.vy *= -1;
-            dot.color = getRandomHexColor();
+            ;
         }
-
         // Remove dots that have moved outside the canvas
         if (dot.x < 0 || dot.x > width || dot.y < 0 || dot.y > height) {
             dots.splice(index, 1);
         }
     });
-
-    // Add new dots if the number of dots is below a certain threshold
-    //if (dots.length < 250) {
-       // makedot(); // Create a new dot
-    //}
-
+    
     // Draw each dot on the canvas
     dots.forEach((dot) => {
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, circleRadius, 0, Math.PI * 2); // Draw a filled circle
+        ctx.globalAlpha = 0.4 //change the number for change the opacity
 
-        const colorramdom = getRandomHexColor()
-        
-        const radgrad = ctx.createRadialGradient (dot.x, dot.y, 0, dot.x, dot.y, 20);
-        radgrad.addColorStop(0, colorramdom);
-        radgrad.addColorStop(1,"orange")
-        radgrad.addColorStop( 0.5,"transparent"); // You can change 'color' to another color if needed
-        ctx.fillStyle = radgrad 
+        for (let i = 0; i < 3; i++) {
+            ctx.arc(dot.x, dot.y, dot.radius * i, 0, Math.PI * 2); // Draw a filled circle
+        }
+
+        const radgrad = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, 20);
+        radgrad.addColorStop(0, "transparent");
+        radgrad.addColorStop(0.3, " red")
+        radgrad.addColorStop(0.5, " transparent")
+        radgrad.addColorStop(0.7, "white"); // You can change 'color' to another color if needed
+        ctx.fillStyle = radgrad
         ctx.fill()
         ctx.closePath()
-    
+
     });
+
 
     // Request the next animation frame
     requestAnimationFrame(moveDots);
 }
- canvas.addEventListener("click",makedot);
- //Start the animation loop
+canvas.addEventListener("click", makedot);
+//Start the animation loop
 moveDots();
-
-// Initial dot creation
-//for (let i = 0; i < 100; i++) {
-    //makedot(); // Create 100 initial dots
-//}
